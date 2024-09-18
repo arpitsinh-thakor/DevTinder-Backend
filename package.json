@@ -1,0 +1,20 @@
+{
+  "name": "devtinder-backend",
+  "version": "1.0.0",
+  "description": "DevTinder Backend",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev" : "nodemon src/app.js",
+    "start" : "node src/app.js"
+  },
+  "keywords": [
+    "namaste",
+    "nodejs"
+  ],
+  "author": "Arpitsinh Thakor",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.0"
+  }
+}

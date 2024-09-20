@@ -2,17 +2,58 @@ const express = require('express');
 const connetDB = require('./config/database');
 const app = express();
 const User = require('./models/user');
+const { validateSignUpData, validateLoginData } = require('./utils/validation');
+const bcrypt = require('bcrypt');
 
 app.use(express.json());
 
 app.post('/signup', async (req, res) => {
-    const user = new User(req.body);
 
     try {
+        validateSignUpData(req);
+
+        const {firstName, lastName, email, password} = req.body;
+
+        const hashedPassword = await bcrypt.hash(password, 8);
+
+        const user = new User({
+            firstName,
+            lastName,
+            email,
+            password: hashedPassword
+        });
+
         const savedUser = await user.save();
         res.send(savedUser);
     } catch (err) {
         res.status(400).send("Error while saving user: " + err);
+    }
+})
+
+app.post('/login', async (req, res) => {
+    
+    try {
+        validateLoginData(req);
+
+        const { email, password } = req.body;
+        
+        const user = await User.findOne({ email });
+        if (!user) {
+            throw new Error("Invalid credentials");
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (!isMatch) {
+            return res.status(404).send("Invalid credentials");
+        }
+
+        res.send({
+            message: "Login successful",
+            user
+        });
+    } catch (err) {
+        res.status(400).send("Error while getting users: " + err);
     }
 })
 

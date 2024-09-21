@@ -4,8 +4,12 @@ const app = express();
 const User = require('./models/user');
 const { validateSignUpData, validateLoginData } = require('./utils/validation');
 const bcrypt = require('bcrypt');
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
+const { userAuth } = require('./middlewares/auth');
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.post('/signup', async (req, res) => {
 
@@ -48,12 +52,32 @@ app.post('/login', async (req, res) => {
             return res.status(404).send("Invalid credentials");
         }
 
+        const token = await jwt.sign({ _id: user._id }, 'DevTinder', { expiresIn: '1h' });
+
+        res.cookie('token', token, {
+            expires: new Date(Date.now() + 3600000),
+        });
+        console.log(token);
         res.send({
             message: "Login successful",
             user
         });
     } catch (err) {
         res.status(400).send("Error while getting users: " + err);
+    }
+})
+
+app.get('/profile', userAuth, async (req, res) => {
+    try {
+        
+        const user = req.user;
+        if (!user) {
+            return res.status(404).send("User not found");
+        }
+
+        res.send(user)
+    } catch (err) {
+        res.status(400).send("Error while getting profile: " + err);
     }
 })
 
@@ -118,6 +142,11 @@ app.patch('/user/:userId', async (req, res) => {
     } catch (err) {
         res.status(400).send("Error while updating user: " + err);
     }
+})
+
+app.post('/sendConnectionRequest/:userId', userAuth, async (req, res) => {
+    const user = req.user;
+    res.send(user);
 })
 
 

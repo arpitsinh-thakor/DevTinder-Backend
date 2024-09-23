@@ -49,4 +49,38 @@ requestRouter.post('/request/send/:status/:receiverId', userAuth, async (req, re
     }
 })
 
+requestRouter.post('/request/review/:status/:requestId', userAuth, async (req, res) => {
+    try{
+        const receiver = req.user;
+        const { status, requestId } = req.params;
+        if(!receiver || !requestId || !status){
+            throw new Error("Invalid data for request");
+        }
+
+        const allowedStatus = ['accepted', 'rejected'];
+        if(!allowedStatus.includes(status)){
+            throw new Error("Invalid status for request");
+        }
+
+        const request = await ConnectionRequest.findOne({
+            _id: requestId,
+            receiver: receiver._id,
+            status: 'interested'
+        });
+        if(!request){
+            throw new Error("Request not found");
+        }
+
+        request.status = status;
+        await request.save();
+        res.send({
+            message: "Request reviewed successfully to: " + status,
+            request
+        });
+    }
+    catch(err){
+        res.status(400).send("Error while reviewing request: " + err);
+    }
+})
+
 module.exports = requestRouter

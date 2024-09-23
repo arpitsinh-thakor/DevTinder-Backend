@@ -28,4 +28,13 @@ const validateLoginData = (req) => {
     }
 }
 
-module.exports = { validateSignUpData, validateLoginData };
+const validateProfileData = (req) => {
+    const allowedEditFields = ['firstName', 'lastName', 'age', 'gender', 'photoUrl', 'about', 'skills'];
+    
+    const isEditAllowed = Object.keys(req.body)
+                            .every((field) => allowedEditFields.includes(field));
+
+    return isEditAllowed;
+}
+
+module.exports = { validateSignUpData, validateLoginData, validateProfileData };

@@ -87,6 +87,9 @@ userSchema.methods.getJWT = async function(){
 
 userSchema.methods.validatePassword = async function(passwordInputByUser){
     const user = this;
+    if(!validator.isStrongPassword(passwordInputByUser)){
+        throw new Error('Not enough strong password');
+    }
     const isMatch = await bcrypt.compare(passwordInputByUser, user.password);
     return isMatch;
 }

@@ -22,6 +22,11 @@ router.post('/signup', async (req, res) => {
         });
 
         const savedUser = await user.save();
+        const token = await savedUser.getJWT();
+
+        res.cookie('token', token, {
+            expires: new Date(Date.now() + 3600000),
+        });
         res.send(savedUser);
     } catch (err) {
         res.status(400).send("Error while saving user: " + err);
@@ -61,7 +66,7 @@ router.post('/login', async (req, res) => {
     }
 })
 
-router.post('/logout', async (req, res) => {
+router.get('/logout', async (req, res) => {
     res.clearCookie('token');
     res.send("Logged out successfully");
 })

@@ -31,7 +31,7 @@ profileRouter.patch('/profile/edit', userAuth, async (req, res) => {
         }
 
         Object.keys(req.body).forEach((field) => {
-            user[field] = req.body[field];
+            user[field] = req.body[field];            
         });
 
         await user.save();

@@ -4,6 +4,8 @@ const { userAuth } = require('../middlewares/auth');
 const User = require('../models/user');
 const ConnectionRequest = require('../models/connectionRequest');
 
+const sendEmail = require('../utils/sendEmail');
+
 requestRouter.post('/request/send/:status/:receiverId', userAuth, async (req, res) => {
     try{
         const sender = req.user;
@@ -39,6 +41,14 @@ requestRouter.post('/request/send/:status/:receiverId', userAuth, async (req, re
             status: status
         });
         await request.save();
+
+        const emailRes = await sendEmail.run(
+            "New Connection Request",
+            `You have a new connection request from ${sender.firstName} ${sender.lastName}. Please check your DevTinder app.`,
+            receiver.email
+      );
+      console.log(emailRes);
+
         res.send({
             message: "Request sent successfully",
             request

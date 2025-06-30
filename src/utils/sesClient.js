@@ -1,7 +1,5 @@
 const { SESClient } = require("@aws-sdk/client-ses");
 
-//env import
-require("dotenv").config();
 
 const REGION =  "eu-north-1";
 

@@ -149,7 +149,7 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
 });
 
 paymentRouter.get('/payment/verify', userAuth, async (req, res) => {
-    const user = req.user;
+    const user = req.user.toJSON();
     if (!user) {return res.status(404).send("User not found");}
 
     try {
@@ -166,9 +166,7 @@ paymentRouter.get('/payment/verify', userAuth, async (req, res) => {
         }
     
         res.status(200).json({
-            isPremium: user.isPremium,
-            membershipType: user.membershipType,
-            paymentDetails: payment
+            ...user,
         });
     } catch (err) {
         res.status(400).send("Error while verifying payment: " + err.message);

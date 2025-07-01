@@ -148,4 +148,31 @@ paymentRouter.post('/payment/webhook', async (req, res) => {
     }
 });
 
+paymentRouter.get('/payment/verify', userAuth, async (req, res) => {
+    const user = req.user;
+    if (!user) {return res.status(404).send("User not found");}
+
+    try {
+        const payment = await Payment.findOne({ userId: user._id, status: 'captured' })
+        
+        if (!payment) {return res.status(404).send("No active payment found for user");}
+        if (!payment.notes || !payment.notes.membershipType) {return res.status(400).send("Missing membership type in payment notes");}
+        if (!membershipAmounts[payment.notes.membershipType]) {return res.status(400).send("Invalid membership type in payment notes");}
+        
+        if (!user.isPremium) {
+            user.isPremium = true;
+            user.membershipType = payment.notes.membershipType;
+            await user.save();
+        }
+    
+        res.status(200).json({
+            isPremium: user.isPremium,
+            membershipType: user.membershipType,
+            paymentDetails: payment
+        });
+    } catch (err) {
+        res.status(400).send("Error while verifying payment: " + err.message);
+    }
+})
+
 module.exports = paymentRouter;
